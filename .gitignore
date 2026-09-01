@@ -2,7 +2,10 @@ venv/
 __pycache__/
 *.pyc
 .pytest_cache/
-models/
+model_checkpoints/
+models/*.bin
+models/*.pt
+models/*.safetensors
 model_checkpoints/
 data/*.csv
 data/*.json

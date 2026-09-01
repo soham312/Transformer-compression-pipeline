@@ -18,6 +18,13 @@ This task is significantly harder due to:
 from datasets import load_dataset
 from transformers import AutoTokenizer
 
+import torchvision.io as _tv_io
+if not hasattr(_tv_io, "VideoReader"):
+    class _StubVideoReader:  # unused stub; only needed so `datasets` internals can import it
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError("Video reading isn't used in this project.")
+    _tv_io.VideoReader = _StubVideoReader
+
 def load_and_tokenize_data(model_name="bert-base-uncased", max_length=128, split="train", num_samples=None):
     """
     Loads the go_emotions dataset and tokenizes the text.

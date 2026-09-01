@@ -32,7 +32,7 @@ def load_and_tokenize_data(model_name="bert-base-uncased", max_length=128, split
         tuple: (Hugging Face Dataset with tokenized inputs and multi-hot labels, tokenizer)
     """
     # Load dataset
-    dataset = load_dataset("go_emotions", split=split)
+    dataset = load_dataset("google-research-datasets/go_emotions", split=split)
     
     if num_samples is not None:
         dataset = dataset.select(range(min(num_samples, len(dataset))))

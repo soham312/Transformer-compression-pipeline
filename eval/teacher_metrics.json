@@ -1,8 +1,8 @@
 {
-    "best_val_loss": 0.6849154233932495,
-    "final_f1": 0.016865079365079364,
-    "final_auc": NaN,
-    "final_accuracy": 0.0,
-    "model_size_mb": 17.65143871307373,
-    "avg_latency_ms_per_seq": 0.6017684936523438
+    "best_val_loss": 0.08550967705600401,
+    "final_f1": 0.40019094099530766,
+    "final_auc": 0.9066423531572524,
+    "final_accuracy": 0.4585329893107261,
+    "model_size_mb": 418.42683506011963,
+    "avg_latency_ms_per_seq": 3.8539505602467163
 }

@@ -24,24 +24,29 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - The teacher model was trained and the best checkpoint was saved to `model_checkpoints/teacher/`.
 - Generated validation metrics in `eval/teacher_metrics.json`.
 
-### Stage 4: Baseline Evaluation (Test Set)
-- Created `eval/evaluate_baseline.py` to evaluate the fine-tuned teacher on the held-out `test` split.
-- Computed strict baseline metrics that future distillation and quantization stages must compare against:
-  - **Macro F1:** 0.4110
-  - **Micro F1:** 0.5815
-  - **Hamming Accuracy:** 0.9708
-  - **Exact-Match Accuracy:** 0.4590
-  - **Model Size:** 418.43 MB
-  - **Average Latency:** 5.43 ms/seq (Apple Silicon MPS)
-- Evaluated per-class metrics (Precision, Recall, F1, TP, FP, TN, FN, Brier Score) for all 28 classes.
-- Generated a reliability diagram (`eval/calibration_reliability.png`).
-- Saved all final test metrics to `eval/teacher_baseline.json`.
-- Created robust unit tests in `tests/test_eval.py` which are currently passing.
+### Stage 4: Baseline evaluation report
+- Full test-set eval of the fine-tuned teacher (held-out `test` split of GoEmotions)
+- Files: `eval/evaluate_baseline.py`, `eval/teacher_baseline.json`, `eval/calibration_reliability.png`, `tests/test_eval.py`
+- Also fixed a torchvision import bug in `data/dataset.py`
+- Baseline metrics (test set):
+  - **Macro F1:** 0.4110, **Micro F1:** 0.5815
+  - **Hamming acc:** 0.9708, **Exact-match acc:** 0.4590
+  - **Model size:** 418.43 MB, **avg latency:** 5.43 ms/seq on M3 Pro MPS
+- Per-class precision/recall/F1/TP/FP/FN/TN/Brier for all 28 emotions in the JSON
+- Rare classes (grief, pride, relief, embarrassment, nervousness) have F1 = 0.0 — matches original Demszky et al. 2020 BERT baseline behavior
+- All 8 tests pass (`test_dataset`, `test_eda`, `test_eval` ×4, `test_train_teacher` ×2)
+
+### Stage 5: Distillation loss & custom student architecture
+- Implemented `distillation/loss.py`: A custom `DistillationLoss` combining standard BCE hard-label loss and scaled binary KL divergence (temperature-scaled) to handle the multi-label nature of GoEmotions.
+- Designed `distillation/student_model.py`: A `StudentTransformer` built from PyTorch primitives targeting ~12M parameters (4 layers, 256 hidden dimension, 4 attention heads). Initialized from scratch.
+- Added comprehensive unit tests in `tests/test_distillation.py` covering model architecture, parameter count, and loss function correctness (including manual KL divergence calculations).
+- All 17 unit tests now pass locally.
 
 ## Current State
 - The Teacher model is fully trained and its test baseline is locked in.
+- The Student architecture and distillation loss are fully implemented and verified via unit tests, but no distillation training has been run yet.
 - All tests pass (`pytest tests/`).
-- No git operations (add/commit/push) have been performed for Stage 4 yet, as the user manually reviews and handles version control.
+- No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- The next phase of the project involves **Knowledge Distillation** (Stages 5–7), which will use the teacher model stored in `model_checkpoints/teacher/` to train a smaller, faster student model.
+- The next phase of the project involves **Knowledge Distillation** (Stages 6–7), which will use the teacher model, the custom loss, and the student architecture to perform the actual distillation training loop.

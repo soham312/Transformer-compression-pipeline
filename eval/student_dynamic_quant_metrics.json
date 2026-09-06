@@ -1,0 +1,29 @@
+{
+    "device": "cpu",
+    "quantization_backend": "qnnpack",
+    "unquantized": {
+        "macro_f1": 0.32686086938405845,
+        "micro_f1": 0.522146847565842,
+        "hamming_acc": 0.9684777172339362,
+        "latency_mean_ms": 0.833613337839351,
+        "latency_median_ms": 0.839967280626297,
+        "size_mb": 43.070908546447754
+    },
+    "quantized": {
+        "macro_f1": 0.32718777585066877,
+        "micro_f1": 0.5225027442371021,
+        "hamming_acc": 0.9685106214956961,
+        "latency_mean_ms": 1.3079036246327793,
+        "latency_median_ms": 1.3197213411331177,
+        "size_mb": 37.29219436645508
+    },
+    "deltas": {
+        "size_reduction_ratio": 1.154957740571864,
+        "size_reduction_mb": 5.778714179992676,
+        "latency_speedup_mean": 0.6373660276944373,
+        "latency_speedup_median": 0.6364732117653701,
+        "macro_f1_delta": 0.00032690646661032163,
+        "micro_f1_delta": 0.00035589667126012525,
+        "hamming_acc_delta": 3.290426175994732e-05
+    }
+}

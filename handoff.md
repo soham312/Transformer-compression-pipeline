@@ -106,9 +106,38 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - **Important caveat:** PyTorch static quantization was applied to the `classifier` layer ONLY. The `nn.TransformerEncoderLayer` crashes during eager-mode calibration (it casts boolean padding masks to float, breaking `masked_fill_`), so the encoder and embeddings had to stay in FP32. Its 0.69 ms latency is therefore not a completely fair test of full-model static quantization — and its 43.29 MB size (slightly larger than baseline due to added scale parameters) confirms almost nothing was quantized.
 - **Also note:** Dynamic-quantized latency measured 1.32 ms in Stage 8 and 1.16 ms in Stage 9 on the same model and device — roughly 14% run-to-run variance in CPU timing. Stage 10 and 11 will need enough repetitions to distinguish real differences from this noise.
 
+### Stage 10: Comprehensive multi-model benchmark (COMPLETE)
+
+This stage produced the final apples-to-apples comparison of all six model variants on the M3 Pro CPU. The benchmark script loaded each variant, ran a warmup, and measured median latency over 5 iterations on the full test set with batch size 32, ensuring fair conditions for evaluating both latency and accuracy.
+
+**Final Results Table (Device: CPU, Threads: 4, Batch: 32)**
+
+| Variant | Size (MB) | Size Reduction | Median Latency (ms) | Speedup | Macro F1 | F1 Retained | Micro F1 | Exact Match |
+|---------|-----------|----------------|---------------------|---------|----------|-------------|----------|-------------|
+| Teacher (BERT-base) | 418.43 | 1.00x | 12.90 | 1.00x | 0.4110 | 100.0% | 0.5815 | 0.4590 |
+| Distilled Student | 43.07 | 9.71x | 0.69 | 18.83x | 0.3269 | 79.5% | 0.5221 | 0.3989 |
+| Scratch Student | 43.07 | 9.71x | 0.64 | 20.32x | 0.3291 | 80.1% | 0.5276 | 0.4048 |
+| Dynamic INT8 (PyTorch) | 36.39 | 11.50x | 1.34 | 9.59x | 0.3272 | 79.6% | 0.5225 | 0.3989 |
+| Static INT8 (PyTorch)* | 42.39 | 9.87x | 0.65 | 19.74x | 0.3244 | 78.9% | 0.5204 | 0.3962 |
+| Dynamic INT8 (ONNX) | 10.85 | 38.57x | 1.08 | 11.90x | 0.3281 | 79.8% | 0.5234 | 0.3999 |
+
+*Note: Static quantization (PyTorch) was applied to the classifier only due to eager-mode bugs in `nn.TransformerEncoderLayer`.*
+
+**Key Findings & Interpretations:**
+1. **Best accuracy-per-MB:** **ONNX INT8**. At just 10.85 MB (a 38.5x reduction over the teacher), it retains ~80% of the teacher's Macro F1. It achieves this because `onnxruntime` successfully quantizes the massive `nn.Embedding` table, which PyTorch's dynamic quantization ignores.
+2. **Best accuracy-per-ms:** **FP32 Student (Scratch/Distilled)**. PyTorch's FP32 models run at ~0.64 - 0.69 ms/seq on CPU, nearly a 20x speedup over the teacher. PyTorch dynamic quantization severely regress latency (1.34 ms/seq) due to activation scaling overhead on tiny layers, and even ONNX INT8 (1.08 ms) is slower than pure FP32 PyTorch.
+3. **Distillation vs. Scratch:** The Scratch student (0.3291 Macro F1) slightly outperformed the Distilled student (0.3269). Distillation provided zero measurable benefit on this architecture and dataset compared to standard hard-label training. 
+4. **Teacher Latency:** The true cost of BERT-base on CPU is high (12.90 ms/batch-seq median), underscoring the necessity of the student models which hit ~0.65ms for a 20x improvement.
+5. **Deployment Recommendation:** 
+   - If **storage/memory** is the absolute bottleneck (e.g., edge devices), deploy the **ONNX INT8** model.
+   - If **CPU latency** is the absolute bottleneck, deploy the **FP32 Scratch Student**.
+
+Files modified/created: `eval/benchmark_all.py`, `tests/test_benchmark.py`, `eval/benchmark_results.json`, `eval/benchmark_table.md`.
+All tests pass and no git operations were executed.
+
 ## Current State
-- Stages 1-9 are complete. We have successfully fine-tuned the teacher, distilled and control-trained the students, and benchmarked PyTorch vs. ONNX quantization strategies.
+- Stages 1-10 are complete. We have successfully fine-tuned the teacher, distilled and control-trained the students, and benchmarked PyTorch vs. ONNX quantization strategies in an apples-to-apples environment.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- Proceed to the remaining stages (Stage 10 unified testing and Stage 11 statistical significance checks).
+- Proceed to the remaining stage (Stage 11 statistical significance checks).

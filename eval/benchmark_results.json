@@ -1,0 +1,102 @@
+{
+    "metadata": {
+        "device": "cpu",
+        "thread_count": 4,
+        "batch_size": 32,
+        "max_length": 64,
+        "test_split_size": 5427,
+        "timing_repetitions": 5,
+        "timing_method": "time.perf_counter() over batch loop, divided by batch_size, warmup 10 batches",
+        "quantization_backend": "qnnpack",
+        "date": "2026-09-06T14:50:43.413836",
+        "caveats": {
+            "static_quantization": "Applied only to the classifier layer. nn.TransformerEncoderLayer crashes during eager-mode calibration, leaving encoder and embeddings in FP32. Size and latency do not reflect a fully statically quantized model."
+        }
+    },
+    "results": {
+        "teacher": {
+            "macro_f1": 0.41095243770424134,
+            "micro_f1": 0.5814786872878159,
+            "hamming_acc": 0.9707941772618389,
+            "exact_match_acc": 0.459001289847061,
+            "latency_mean_ms": 18.035210356874984,
+            "latency_median_ms": 12.902261718750196,
+            "latency_std_ms": 29.228773079753534,
+            "size_mb": 418.42683506011963,
+            "params": 109503772,
+            "size_reduction_factor": 1.0,
+            "speedup_factor": 1.0,
+            "macro_f1_retained_pct": 100.0
+        },
+        "student_distilled": {
+            "macro_f1": 0.32686086938405845,
+            "micro_f1": 0.522146847565842,
+            "hamming_acc": 0.9684777172339362,
+            "exact_match_acc": 0.39893126957803576,
+            "latency_mean_ms": 0.6755321092279211,
+            "latency_median_ms": 0.6851822968751975,
+            "latency_std_ms": 0.04401296837209202,
+            "size_mb": 43.070908546447754,
+            "params": 11111452,
+            "size_reduction_factor": 9.71483651450926,
+            "speedup_factor": 18.83040729101073,
+            "macro_f1_retained_pct": 79.53739639799805
+        },
+        "student_scratch": {
+            "macro_f1": 0.3290863946798459,
+            "micro_f1": 0.5275644141954302,
+            "hamming_acc": 0.9680236384216484,
+            "exact_match_acc": 0.4048277132854247,
+            "latency_mean_ms": 0.6429669916176298,
+            "latency_median_ms": 0.6350123749996328,
+            "latency_std_ms": 0.03553807230142963,
+            "size_mb": 43.07090950012207,
+            "params": 11111452,
+            "size_reduction_factor": 9.714836299403748,
+            "speedup_factor": 20.31812642825686,
+            "macro_f1_retained_pct": 80.07894940793278
+        },
+        "student_dynamic_quant": {
+            "macro_f1": 0.32718777585066877,
+            "micro_f1": 0.5225027442371021,
+            "hamming_acc": 0.9685106214956961,
+            "exact_match_acc": 0.39893126957803576,
+            "latency_mean_ms": 1.3127972666176104,
+            "latency_median_ms": 1.3447142031246528,
+            "latency_std_ms": 0.13249243137212804,
+            "size_mb": 36.39039134979248,
+            "params": 11111452,
+            "size_reduction_factor": 11.498277966788223,
+            "speedup_factor": 9.594798425397592,
+            "macro_f1_retained_pct": 79.6169448898957
+        },
+        "student_static_quant": {
+            "macro_f1": 0.3243620430458326,
+            "micro_f1": 0.5204050937531335,
+            "hamming_acc": 0.9685237832004001,
+            "exact_match_acc": 0.39616731159019714,
+            "latency_mean_ms": 0.7037488698896928,
+            "latency_median_ms": 0.6536842500004525,
+            "latency_std_ms": 0.09658620089869753,
+            "size_mb": 42.38628101348877,
+            "params": 11111452,
+            "size_reduction_factor": 9.871751544490582,
+            "speedup_factor": 19.73775828122104,
+            "macro_f1_retained_pct": 78.9293390879635
+        },
+        "student_onnx_int8": {
+            "macro_f1": 0.3280514744150028,
+            "micro_f1": 0.5233868554901765,
+            "hamming_acc": 0.9685501066098081,
+            "exact_match_acc": 0.3998525889073153,
+            "latency_mean_ms": 1.0868220062132476,
+            "latency_median_ms": 1.084010437498506,
+            "latency_std_ms": 0.06031021923600704,
+            "size_mb": 10.84902572631836,
+            "params": 11111452,
+            "size_reduction_factor": 38.5681484785375,
+            "speedup_factor": 11.902340856167244,
+            "macro_f1_retained_pct": 79.82711484755772
+        }
+    }
+}

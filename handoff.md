@@ -59,9 +59,26 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - **Important for Stage 7:** The from-scratch control student MUST use the identical budget (15 epochs, patience=3, lr=5e-5, batch=32) and the same `StudentTransformer` architecture, or the distillation-vs-scratch comparison is invalid.
 - **Fixes/Lessons:** `models/train_teacher.py` now takes a configurable `metrics_file` parameter, and both `tests/test_train_teacher.py` and `tests/test_train_student.py` write to pytest `tmp_path` — earlier, smoke tests were silently overwriting real training results in `eval/`.
 
+### Stage 7: Control group (student trained from scratch) (COMPLETE)
+- Trained on Colab T4 without any teacher or distillation loss, using plain `BCEWithLogitsLoss`.
+- Architecture and budget verified absolutely identical to the distilled student (`StudentTransformer` config, 15 epochs, patience=3, lr=5e-5, batch_size=32, max_length=64).
+- Budget results: 15-epoch limit, early stopping fired at epoch 8, best checkpoint selected at epoch 5.
+- Final metrics (validation split, best checkpoint):
+  - **macro F1:** 0.3233
+  - **micro F1:** 0.5234
+  - **Hamming accuracy:** 0.9674
+  - **model size:** 43.07 MB
+  - **avg latency:** 0.15 ms/seq on T4
+- **Key Finding:** The distilled student (0.3277) and the from-scratch control student (0.3233) differ by only 0.0044 macro F1 — a gap that falls within expected noise for a single seed. Under matched architecture and budget, distillation showed no measurable benefit over standard hard-label training.
+- **Candidate Explanations:**
+  1. The teacher is weak (0.4002 macro F1 vs the ~0.46 published baseline), leaving little advantage to transfer.
+  2. Multi-label sigmoid outputs inherently carry less cross-class "dark knowledge" than the softmax distributions assumed in standard Hinton-style distillation.
+- **Note:** The scratch model reached a higher peak macro F1 (0.3757 at epoch 7) than the distilled model ever did, but that checkpoint was discarded because validation loss had already started rising. A loss/F1 divergence was observed in both student models.
+- **Stage 11 Imperative:** The significance testing in Stage 11 is now load-bearing. It will determine whether the 0.0044 F1 gap is a real (but small) signal or purely statistical noise across seeds.
+
 ## Current State
-- Stages 1-6 are complete. The distilled student has been successfully trained on Colab.
+- Stages 1-7 are complete. The distilled student and scratch control student have both been successfully trained and compared.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- Proceed to Stage 7 (Evaluation of the distilled student & scratch student baseline).
+- Proceed to the remaining stages (Test set evaluation and statistical significance checks).

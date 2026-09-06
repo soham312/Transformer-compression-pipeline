@@ -20,13 +20,13 @@ from distillation.student_model import StudentTransformer
 from distillation.loss import DistillationLoss
 
 # --- Hyperparameters ---
-NUM_EPOCHS = 5
+NUM_EPOCHS = 15
 BATCH_SIZE = 32
 LR = 5e-5
 ALPHA = 0.5
 TEMPERATURE = 4.0
 WARMUP_RATIO = 0.1
-PATIENCE = 2
+PATIENCE = 3
 MAX_LENGTH = 64
 NUM_SAMPLES = None
 # -----------------------

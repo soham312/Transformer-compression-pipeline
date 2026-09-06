@@ -42,22 +42,26 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - Added comprehensive unit tests in `tests/test_distillation.py` covering model architecture, parameter count, and loss function correctness (including manual KL divergence calculations).
 - All 17 unit tests now pass locally.
 
-### Stage 6: Train the distilled student (In-Progress)
-- **Status:** Code complete, but actual training is pending on Colab.
-- Created `distillation/train_student.py` implementing the distillation training loop.
-- Default Hyperparameters: `alpha=0.5`, `T=4.0`, `lr=5e-5`, `batch=32`, `epochs=5`, linear warmup (`warmup_ratio=0.1`).
-- Included optimization and tracking features:
-  - **Metrics mismatch fix:** Snapshot metrics at the best-val-loss epoch instead of the final epoch to accurately reflect the saved checkpoint.
-  - **Config serialization:** Dumps `student_config.json` containing `StudentTransformer` kwargs to `model_checkpoints/student_distilled/` for robust loading.
-  - **Precomputed Teacher Logits:** Replaces redundant teacher forward passes during training with a cached `TensorDataset` generated before the loop, radically speeding up training.
-- Added 3 unit tests in `tests/test_train_student.py` ensuring end-to-end smoketests, freezing of teacher parameters, and verification of cached logits. 
-- All 20 unit tests pass locally (`pytest tests/`).
+### Stage 6: Distilled student trained (COMPLETE)
+- Trained on Colab T4 using cached teacher logits (precomputed once, not per-epoch).
+- Budget: 15 epochs, early stopping fired at epoch 10 (patience=3); best checkpoint is epoch 7.
+- Final metrics (validation split, corresponding to the saved best-val-loss checkpoint):
+  - **best_val_loss:** 0.0729
+  - **macro F1:** 0.3277
+  - **micro F1:** 0.5266
+  - **Hamming accuracy:** 0.9685
+  - **model size:** 43.07 MB
+  - **avg latency:** 0.16 ms/seq (measured on T4 — note: teacher's 5.43 ms/seq was measured on M3 Pro MPS, so these are not directly comparable; Stage 10 must re-measure all variants on the same device)
+- Hyperparameters: `alpha=0.5`, `temperature=4.0`, `lr=5e-5`, `batch_size=32`, `max_length=64`.
+- Compression achieved: 418.43 MB → 43.07 MB (9.7× smaller), retaining ~82% of teacher macro F1 (0.4002 → 0.3277).
+- Files: `distillation/train_student.py`, `tests/test_train_student.py`, `eval/student_distilled_metrics.json`, `model_checkpoints/student_distilled/` (weights + `student_config.json`, also backed up to Google Drive).
+- **Note:** An earlier 5-epoch run reached only macro F1 0.1876 — the student was clearly undertrained at that budget. That run is archived in Drive as `student_distilled_5ep` / `student_distilled_metrics_5ep.json` for comparison in the README.
+- **Important for Stage 7:** The from-scratch control student MUST use the identical budget (15 epochs, patience=3, lr=5e-5, batch=32) and the same `StudentTransformer` architecture, or the distillation-vs-scratch comparison is invalid.
+- **Fixes/Lessons:** `models/train_teacher.py` now takes a configurable `metrics_file` parameter, and both `tests/test_train_teacher.py` and `tests/test_train_student.py` write to pytest `tmp_path` — earlier, smoke tests were silently overwriting real training results in `eval/`.
 
 ## Current State
-- Stages 1-5 are complete. Stage 6 code is complete, but the actual training run is pending on Colab.
+- Stages 1-6 are complete. The distilled student has been successfully trained on Colab.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- Execute the student distillation training on a Colab T4 GPU.
-- Review `eval/student_distilled_metrics.json` after training completes.
-- Proceed to Stage 7 (Evaluation of the distilled student) once training is verified.
+- Proceed to Stage 7 (Evaluation of the distilled student & scratch student baseline).

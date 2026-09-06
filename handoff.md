@@ -42,11 +42,22 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - Added comprehensive unit tests in `tests/test_distillation.py` covering model architecture, parameter count, and loss function correctness (including manual KL divergence calculations).
 - All 17 unit tests now pass locally.
 
+### Stage 6: Train the distilled student (In-Progress)
+- **Status:** Code complete, but actual training is pending on Colab.
+- Created `distillation/train_student.py` implementing the distillation training loop.
+- Default Hyperparameters: `alpha=0.5`, `T=4.0`, `lr=5e-5`, `batch=32`, `epochs=5`, linear warmup (`warmup_ratio=0.1`).
+- Included optimization and tracking features:
+  - **Metrics mismatch fix:** Snapshot metrics at the best-val-loss epoch instead of the final epoch to accurately reflect the saved checkpoint.
+  - **Config serialization:** Dumps `student_config.json` containing `StudentTransformer` kwargs to `model_checkpoints/student_distilled/` for robust loading.
+  - **Precomputed Teacher Logits:** Replaces redundant teacher forward passes during training with a cached `TensorDataset` generated before the loop, radically speeding up training.
+- Added 3 unit tests in `tests/test_train_student.py` ensuring end-to-end smoketests, freezing of teacher parameters, and verification of cached logits. 
+- All 20 unit tests pass locally (`pytest tests/`).
+
 ## Current State
-- The Teacher model is fully trained and its test baseline is locked in.
-- The Student architecture and distillation loss are fully implemented and verified via unit tests, but no distillation training has been run yet.
-- All tests pass (`pytest tests/`).
+- Stages 1-5 are complete. Stage 6 code is complete, but the actual training run is pending on Colab.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- The next phase of the project involves **Knowledge Distillation** (Stages 6–7), which will use the teacher model, the custom loss, and the student architecture to perform the actual distillation training loop.
+- Execute the student distillation training on a Colab T4 GPU.
+- Review `eval/student_distilled_metrics.json` after training completes.
+- Proceed to Stage 7 (Evaluation of the distilled student) once training is verified.

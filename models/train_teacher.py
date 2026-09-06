@@ -70,14 +70,15 @@ def train_teacher(
     patience=2,
     output_dir="model_checkpoints/teacher",
     num_samples=None,  # Helpful for fast testing
-    plot_dir="dashboard"
+    plot_dir="dashboard",
+    metrics_file="eval/teacher_metrics.json"
 ):
     device = get_device()
     print(f"Using device: {device}")
     
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(plot_dir, exist_ok=True)
-    os.makedirs("eval", exist_ok=True)
+    os.makedirs(os.path.dirname(metrics_file), exist_ok=True)
     
     print("Loading datasets...")
     train_ds, tokenizer = load_and_tokenize_data(model_name, max_length=max_length, split="train", num_samples=num_samples)
@@ -243,7 +244,7 @@ def train_teacher(
         "avg_latency_ms_per_seq": avg_latency_ms
     }
     
-    with open("eval/teacher_metrics.json", "w") as f:
+    with open(metrics_file, "w") as f:
         json.dump(final_metrics, f, indent=4)
         
     # Plot learning curves
@@ -271,7 +272,7 @@ def train_teacher(
     plt.savefig(os.path.join(plot_dir, "teacher_training_curves.png"))
     plt.close()
     
-    print("Training pipeline complete! Baseline metrics saved to eval/teacher_metrics.json.")
+    print(f"Training pipeline complete! Baseline metrics saved to {metrics_file}.")
     return final_metrics
 
 if __name__ == "__main__":

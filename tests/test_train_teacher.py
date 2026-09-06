@@ -17,6 +17,8 @@ def test_train_teacher_pipeline(tmp_path):
     output_dir = os.path.join(tmp_path, "teacher")
     plot_dir = os.path.join(tmp_path, "dashboard")
     
+    metrics_file = os.path.join(tmp_path, "eval", "teacher_metrics.json")
+    
     # Run a tiny training loop (1 epoch, 8 samples, using tiny BERT to keep test time low)
     metrics = train_teacher(
         model_name="prajjwal1/bert-tiny", # Extremely fast tiny BERT model
@@ -25,7 +27,8 @@ def test_train_teacher_pipeline(tmp_path):
         max_length=16,
         output_dir=output_dir,
         num_samples=8,
-        plot_dir=plot_dir
+        plot_dir=plot_dir,
+        metrics_file=metrics_file
     )
     
     # Verify model assets were saved
@@ -39,7 +42,7 @@ def test_train_teacher_pipeline(tmp_path):
     
     # Verify outputs and plots
     assert os.path.exists(os.path.join(plot_dir, "teacher_training_curves.png"))
-    assert os.path.exists("eval/teacher_metrics.json")
+    assert os.path.exists(metrics_file)
     
     # Verify metrics dictionary structure
     assert "best_val_loss" in metrics

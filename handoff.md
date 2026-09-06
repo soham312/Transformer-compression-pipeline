@@ -76,9 +76,39 @@ We are building a pipeline to compress a Transformer model (BERT-base-uncased) f
 - **Note:** The scratch model reached a higher peak macro F1 (0.3757 at epoch 7) than the distilled model ever did, but that checkpoint was discarded because validation loss had already started rising. A loss/F1 divergence was observed in both student models.
 - **Stage 11 Imperative:** The significance testing in Stage 11 is now load-bearing. It will determine whether the 0.0044 F1 gap is a real (but small) signal or purely statistical noise across seeds.
 
+### Stage 8: Dynamic quantization (COMPLETE)
+- Run locally on M3 Pro CPU.
+- Files: `quantization/dynamic_quantize.py`, `tests/test_quantization.py`, `eval/student_dynamic_quant_metrics.json`.
+- Applied `quantize_dynamic` (`qint8`, `nn.Linear`) to the distilled student, using the `qnnpack` backend.
+- **Results:**
+  - **Size:** 43.07 MB → 37.29 MB (only ~13% reduction)
+  - **Median latency:** 0.84 ms/seq → 1.32 ms/seq (**57% REGRESSION**)
+  - **Macro F1:** 0.3269 → 0.3272 (virtually unchanged)
+- **Causes for poor performance:**
+  1. The model's footprint is dominated by the 30,522 × 256 embedding table (~31 MB), which dynamic quantization does not touch.
+  2. The per-forward-pass activation range computation costs more time than the INT8 matmul saves on these small Linear layers.
+- **Verdict:** Dynamic quantization is not worth it on this architecture.
+
+### Stage 9: Static quantization + ONNX export (COMPLETE)
+- Run locally on M3 Pro CPU.
+- Files: `quantization/static_quantize.py`, `quantization/onnx_export.py`, `tests/test_static_quantization.py`, `eval/quantization_comparison.json`.
+- Unified CPU benchmark (batch 32, seq_len 64, test split):
+
+| Variant | Size | Median latency | Macro F1 |
+|---------|------|----------------|----------|
+| PyTorch Float | 43.07 MB | 0.85 ms | 0.3269 |
+| PyTorch Dynamic INT8 | 37.29 MB | 1.16 ms | 0.3272 |
+| PyTorch Static INT8 | 43.29 MB | 0.69 ms | 0.3244 |
+| ONNX Float | 42.52 MB | 1.25 ms | 0.3269 |
+| ONNX Dynamic INT8 | 10.85 MB | 1.19 ms | 0.3281 |
+
+- **Key finding:** ONNX INT8 achieves a **4× size reduction** at no accuracy cost. This is because ONNX Runtime's quantizer successfully compresses `nn.Embedding`, whereas PyTorch's eager mode quantizer only targets `nn.Linear`. Since embeddings constitute ~70% of this model, the framework choice mattered significantly more than the quantization technique itself.
+- **Important caveat:** PyTorch static quantization was applied to the `classifier` layer ONLY. The `nn.TransformerEncoderLayer` crashes during eager-mode calibration (it casts boolean padding masks to float, breaking `masked_fill_`), so the encoder and embeddings had to stay in FP32. Its 0.69 ms latency is therefore not a completely fair test of full-model static quantization — and its 43.29 MB size (slightly larger than baseline due to added scale parameters) confirms almost nothing was quantized.
+- **Also note:** Dynamic-quantized latency measured 1.32 ms in Stage 8 and 1.16 ms in Stage 9 on the same model and device — roughly 14% run-to-run variance in CPU timing. Stage 10 and 11 will need enough repetitions to distinguish real differences from this noise.
+
 ## Current State
-- Stages 1-7 are complete. The distilled student and scratch control student have both been successfully trained and compared.
+- Stages 1-9 are complete. We have successfully fine-tuned the teacher, distilled and control-trained the students, and benchmarked PyTorch vs. ONNX quantization strategies.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
 
 ## Next Steps
-- Proceed to the remaining stages (Test set evaluation and statistical significance checks).
+- Proceed to the remaining stages (Stage 10 unified testing and Stage 11 statistical significance checks).

@@ -1,0 +1,46 @@
+{
+    "device": "cpu",
+    "quantization_backend": "qnnpack",
+    "results": {
+        "pytorch_float": {
+            "macro_f1": 0.32686086938405845,
+            "micro_f1": 0.522146847565842,
+            "hamming_acc": 0.9684777172339362,
+            "latency_mean_ms": 0.8448502158417421,
+            "latency_median_ms": 0.8490458130836487,
+            "size_mb": 43.070908546447754
+        },
+        "pytorch_dynamic": {
+            "macro_f1": 0.32718777585066877,
+            "micro_f1": 0.5225027442371021,
+            "hamming_acc": 0.9685106214956961,
+            "latency_mean_ms": 1.1659862802309149,
+            "latency_median_ms": 1.1572837829589844,
+            "size_mb": 37.29219436645508
+        },
+        "pytorch_static": {
+            "macro_f1": 0.3244102250811863,
+            "micro_f1": 0.5206056352150807,
+            "hamming_acc": 0.9685369449051041,
+            "latency_mean_ms": 0.6963038269211265,
+            "latency_median_ms": 0.6905943155288696,
+            "size_mb": 43.28742790222168
+        },
+        "onnx_float": {
+            "macro_f1": 0.32686086938405845,
+            "micro_f1": 0.522146847565842,
+            "hamming_acc": 0.9684777172339362,
+            "latency_mean_ms": 1.3275384902954102,
+            "latency_median_ms": 1.2507140636444092,
+            "size_mb": 42.52365207672119
+        },
+        "onnx_int8": {
+            "macro_f1": 0.3280514744150028,
+            "micro_f1": 0.5233868554901765,
+            "hamming_acc": 0.9685501066098081,
+            "latency_mean_ms": 1.1873642311376684,
+            "latency_median_ms": 1.1914074420928955,
+            "size_mb": 10.84902572631836
+        }
+    }
+}

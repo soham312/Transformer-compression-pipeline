@@ -41,7 +41,7 @@ class StudentTransformer(nn.Module):
             activation="gelu",
             batch_first=True
         )
-        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_hidden_layers)
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_hidden_layers, enable_nested_tensor=False)
         
         # 3. Classification Head
         self.classifier = nn.Linear(hidden_size, num_labels)

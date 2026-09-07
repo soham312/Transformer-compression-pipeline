@@ -67,33 +67,35 @@ def aggregate_seeds():
         markdown += f"- Hamming Acc: {scratch_stats['final_hamming_acc']['mean']:.4f} ± {scratch_stats['final_hamming_acc']['std']:.4f}\n"
         
     if n_dist > 1 and n_scratch > 1:
-        dist_macro = dist_stats['final_macro_f1']['values']
-        scratch_macro = scratch_stats['final_macro_f1']['values']
-        
-        diff_mean = np.mean(dist_macro) - np.mean(scratch_macro)
-        # Variance of the difference of means
-        diff_var = (np.var(dist_macro, ddof=1) / n_dist) + (np.var(scratch_macro, ddof=1) / n_scratch)
-        diff_std = np.sqrt(diff_var)
-        
-        t_stat, p_val = stats.ttest_ind(dist_macro, scratch_macro, equal_var=False)
-        
-        out_json["ttest"] = {
-            "metric": "final_macro_f1",
-            "mean_diff_distilled_minus_scratch": float(diff_mean),
-            "std_of_diff": float(diff_std),
-            "t_statistic": float(t_stat),
-            "p_value": float(p_val)
-        }
-        
         markdown += "\n## Statistical Significance (Welch's t-test)\n"
-        markdown += f"Comparing Distilled vs Scratch on Macro F1 (n={n_dist} vs n={n_scratch}):\n"
-        markdown += f"- Mean Difference (Distilled - Scratch): {diff_mean:.4f} ± {diff_std:.4f}\n"
-        markdown += f"- t-statistic: {t_stat:.4f}\n"
-        markdown += f"- p-value: {p_val:.4f}\n"
-        if p_val < 0.05:
-            markdown += "=> The difference IS statistically significant (p < 0.05).\n"
-        else:
-            markdown += "=> The difference is NOT statistically significant (p >= 0.05).\n"
+        
+        for metric in metrics_to_agg:
+            dist_vals = dist_stats[metric]['values']
+            scratch_vals = scratch_stats[metric]['values']
+            
+            diff_mean = np.mean(dist_vals) - np.mean(scratch_vals)
+            diff_var = (np.var(dist_vals, ddof=1) / n_dist) + (np.var(scratch_vals, ddof=1) / n_scratch)
+            diff_std = np.sqrt(diff_var)
+            
+            t_stat, p_val = stats.ttest_ind(dist_vals, scratch_vals, equal_var=False)
+            
+            out_json["ttest"][metric] = {
+                "mean_diff_distilled_minus_scratch": float(diff_mean),
+                "std_of_diff": float(diff_std),
+                "t_statistic": float(t_stat),
+                "p_value": float(p_val)
+            }
+            
+            metric_name = metric.replace("final_", "").replace("_", " ").title()
+            
+            markdown += f"Comparing Distilled vs Scratch on {metric_name} (n={n_dist} vs n={n_scratch}):\n"
+            markdown += f"- Mean Difference (Distilled - Scratch): {diff_mean:.4f} ± {diff_std:.4f}\n"
+            markdown += f"- t-statistic: {t_stat:.4f}\n"
+            markdown += f"- p-value: {p_val:.4f}\n"
+            if p_val < 0.05:
+                markdown += "=> The difference IS statistically significant (p < 0.05).\n\n"
+            else:
+                markdown += "=> The difference is NOT statistically significant (p >= 0.05).\n\n"
     else:
         markdown += "\n*Not enough data for Welch's t-test (requires n>1 for both).* \n"
         

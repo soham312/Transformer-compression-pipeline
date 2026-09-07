@@ -1,0 +1,15 @@
+{
+    "best_val_loss": 0.0955446232767666,
+    "final_macro_f1": 0.323517651596197,
+    "final_micro_f1": 0.511164274322169,
+    "final_hamming_acc": 0.9677215523142542,
+    "model_size_mb": 43.07090950012207,
+    "avg_latency_ms_per_seq": 0.1586730129552687,
+    "hyperparameters": {
+        "loss": "bce_hard_labels_only",
+        "lr": 5e-05,
+        "epochs_run": 8,
+        "batch_size": 32,
+        "seed": 1011
+    }
+}

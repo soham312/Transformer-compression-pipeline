@@ -136,35 +136,54 @@ Files modified/created: `eval/benchmark_all.py`, `tests/test_benchmark.py`, `eva
 All tests pass and no git operations were executed.
 
 ## Current State
-- Stages 1-10 are complete. We have successfully fine-tuned the teacher, distilled and control-trained the students, and benchmarked PyTorch vs. ONNX quantization strategies in an apples-to-apples environment.
+- All 11 Stages are complete. We have successfully fine-tuned the teacher, distilled and control-trained the students, benchmarked PyTorch vs. ONNX quantization strategies, and performed rigorous statistical significance testing.
 - No git operations have been performed for the recent stages, as the user manually reviews and handles version control.
-
-## Next Steps
-- Proceed to the remaining stage (Stage 11 statistical significance checks).
 
 ### Stage 11 — Statistical Significance (COMPLETE)
 
-**Status:** Code is complete, tests pass, bootstrap analysis run locally. Multi-seed training script is ready for Colab execution.
+Files: `distillation/run_multiseed.py`, `eval/bootstrap_significance.py`, `eval/aggregate_seeds.py`, `tests/test_significance.py`, `eval/multiseed_results.json`, 10 per-seed metrics files (`eval/student_distilled_metrics_seed{42,123,456,789,1011}.json` and the scratch equivalents). `train_student.py` and `train_scratch.py` now accept `seed`, `output_dir`, and `metrics_file` parameters with determinism enforced across torch, numpy, and random.
 
-**Deliverables Completed:**
-1. **Multi-seed Training Support**: Modified `distillation/train_student.py` and `distillation/train_scratch.py` to accept `--seed` (setting `torch`, `numpy`, and `random`), `--output_dir`, and `--metrics_file`. Created `distillation/run_multiseed.py` to orchestrate training both variants across 5 seeds (42, 123, 456, 789, 1011).
-2. **Bootstrap Significance**: Implemented `eval/bootstrap_significance.py` to compute 95% CIs over 1,000 resamples of the test set, caching predictions to run efficiently in ~1.5 minutes on CPU.
-3. **Aggregation Script**: Implemented `eval/aggregate_seeds.py` to read all seed metrics and output `eval/multiseed_results.json` and a markdown summary, including Welch's t-test for F1 difference.
-4. **Unit Tests**: Added `tests/test_significance.py` which validates bootstrap math on synthetic data, paired zero-diff logic, seed setting effectiveness, and graceful degradation when files are missing. All tests write to `tmp_path` and leave the repository completely clean.
+**Multi-seed results (5 seeds, run on Colab T4, best-val-loss checkpoint per run):**
 
-**Bootstrap Findings (Single Seed Run on Test Set):**
-- **Distilled minus Scratch (Macro F1):**
-  - Mean diff: -0.0024
-  - 95% CI: [-0.0111, 0.0064]
-  - **Result:** The 95% CI straddles zero, making the difference statistically insignificant.
-- **Quantized (ONNX INT8) minus Unquantized (Distilled FP32):**
-  - Mean diff: +0.0012
-  - 95% CI: [0.0003, 0.0023]
-  - **Result:** The 95% CI excludes zero. Quantization actually provided a statistically significant *improvement* of roughly ~0.0012 Macro F1.
+| Metric | Distilled | Scratch | Diff | p-value |
+|--------|-----------|---------|------|---------|
+| Macro F1 | 0.3277 ± 0.0061 | 0.3251 ± 0.0054 | +0.0026 | 0.4878 (not significant) |
+| Micro F1 | 0.5251 ± 0.0034 | 0.5101 ± 0.0027 | +0.0151 | 0.0001 (significant) |
+| Hamming Acc | 0.9684 ± 0.0000 | 0.9676 ± 0.0002 | +0.0008 | 0.0013 (significant) |
 
-**Scientific Conclusions:**
-- **Does distillation work?** The data firmly rejects the hypothesis that distillation improves accuracy over hard labels for this specific architecture and dataset.
-- **Does quantization preserve accuracy?** Yes. Not only does it preserve accuracy, but the injection of quantization noise acts as a mild regularization, resulting in a tiny but statistically significant gain in accuracy.
+*Welch's t-test, unequal variances, n=5 per group.*
 
-**Estimated Colab Runtime:**
-`run_multiseed.py` trains 10 models (5 distilled, 5 scratch) for a maximum of 15 epochs each. Given that a single run (with early stopping at ~8-10 epochs) takes roughly 3 to 4 minutes on a T4 GPU, we expect the full multi-seed script to take approximately **30 to 40 minutes** on Colab.
+**HEADLINE FINDING:** Distillation produces a statistically significant improvement in micro F1 (+0.015, p=0.0001, t=7.70) and Hamming accuracy, but no significant improvement in macro F1. 
+**The mechanism:** Micro F1 and Hamming weight every label decision equally and are therefore dominated by frequent classes, where the teacher performs well (gratitude 0.92, amusement 0.82, love 0.81 per Stage 4). Macro F1 weights all 28 classes equally and is dominated by the five classes where the teacher scores exactly zero — grief, pride, relief, embarrassment, nervousness. Distillation can only transfer knowledge the teacher possesses; it possesses none about those classes. This supersedes the earlier reading that distillation showed no benefit at all — the benefit is real but metric-dependent and mechanistically explained.
+
+**Bootstrap results (1000 resamples, paired, test split):**
+- **Distilled minus scratch macro F1:** 95% CI [-0.0111, 0.0064], straddles zero — consistent with the multi-seed macro F1 null
+- **ONNX INT8 minus FP32 distilled:** mean +0.0012, 95% CI [0.0003, 0.0023], excludes zero — quantization's accuracy cost is not merely small but statistically indistinguishable from zero, if anything marginally favorable. Do not claim quantization improves accuracy; the correct claim is no measurable degradation.
+
+**Also worth recording:** The multi-seed run was executed twice (the first Colab session was reclaimed before results were downloaded) and produced numerically identical per-seed results, confirming the seeding is fully deterministic and the pipeline reproducible.
+
+**Consistent secondary observation across all 10 runs:** The scratch student's validation loss bottoms out at epoch 5 in every seed and then rises, while its macro F1 continues climbing to 0.37–0.38 by epochs 7–8. The distilled student's val loss keeps improving to epoch 7–8. 
+**Two implications:** 
+(a) distillation acts as a regularizer, extending useful training by 2–3 epochs.
+(b) selecting checkpoints on validation loss systematically costs the scratch model roughly 0.04 macro F1 relative to its peak. This loss/F1 divergence on imbalanced multi-label data is worth documenting in the README.
+
+### Deferred Improvements (identified, not yet actioned)
+- Teacher `pos_weight` for class imbalance (Stage 2 EDA flagged this; Stage 3 never implemented it — the teacher's rare-class collapse is now directly implicated in the macro F1 null).
+- Per-class threshold tuning fit on validation.
+- Reduced student vocabulary to shrink the dominant embedding table.
+
+### Stage 12 — Streamlit Dashboard (COMPLETE)
+
+Files: `dashboard/app.py`
+
+**Status:** Code complete, verified to run cleanly with `streamlit run dashboard/app.py`. 
+No additional dependencies were added beyond what was already in `requirements.txt` (used `streamlit` + `matplotlib`).
+
+**What it visualizes:**
+1. **The Trade-Off Surface:** A scatter plot graphing the six benchmarked variants' Macro F1 against their Size (MB, log scale), with marker size mapped to inference latency. Accompanied by a bar chart showing compression/speedup factors relative to the teacher. This perfectly isolates the top-right teacher vs the mid-left ONNX INT8 compression win.
+2. **Training Curves (Caveat):** Because the per-epoch loss and F1 histories were not recorded into the JSON artifacts during Stages 6 and 7, this panel currently renders an informative warning instead of fabricating charts. It explicitly documents the Stage 11 finding about the loss/F1 divergence (validation loss bottoming at epoch 5 while F1 peaks at epochs 7-8).
+3. **Statistical Significance:** A visual strip plot of the actual multi-seed spread for Macro F1, Micro F1, and Hamming Accuracy for both Distilled and Scratch models. It includes the Welch's t-test outcomes and explicitly explains the mechanism behind the significance split (teacher's strength in frequent classes translating to Micro F1 wins, while its collapse on rare classes nullifies Macro F1 gains).
+4. **Per-Class Diagnostics:** A paired-axis bar/line chart graphing the teacher's F1 score alongside true class support, rendering the rare-class collapse visually undeniable. Includes the calibration reliability plot from Stage 4.
+
+**Notes for Execution:**
+The dashboard gracefully degrades with explicit error messages if any artifact JSON file goes missing, and correctly populates metadata about the benchmarking environment directly from the dynamically loaded files.

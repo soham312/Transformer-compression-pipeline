@@ -96,8 +96,16 @@ def train_student(
     num_samples=NUM_SAMPLES,
     teacher_dir="model_checkpoints/teacher",
     output_dir="model_checkpoints/student_distilled",
-    metrics_file="eval/student_distilled_metrics.json"
+    metrics_file="eval/student_distilled_metrics.json",
+    seed=42
 ):
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        
     device = get_device()
     print(f"Using device: {device}")
     
@@ -303,7 +311,8 @@ def train_student(
             "temperature": float(temperature),
             "lr": float(lr),
             "epochs_run": int(len(history["train_loss"])),
-            "batch_size": int(batch_size)
+            "batch_size": int(batch_size),
+            "seed": int(seed)
         }
     }
     
@@ -314,4 +323,11 @@ def train_student(
     return final_metrics
 
 if __name__ == "__main__":
-    train_student()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output_dir", type=str, default="model_checkpoints/student_distilled")
+    parser.add_argument("--metrics_file", type=str, default="eval/student_distilled_metrics.json")
+    parser.add_argument("--seed", type=int, default=42)
+    args = parser.parse_args()
+    
+    train_student(output_dir=args.output_dir, metrics_file=args.metrics_file, seed=args.seed)

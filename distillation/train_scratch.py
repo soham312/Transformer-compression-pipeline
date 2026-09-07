@@ -62,8 +62,16 @@ def train_scratch(
     max_length=MAX_LENGTH,
     num_samples=NUM_SAMPLES,
     output_dir="model_checkpoints/student_scratch",
-    metrics_file="eval/student_scratch_metrics.json"
+    metrics_file="eval/student_scratch_metrics.json",
+    seed=42
 ):
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        
     device = get_device()
     print(f"Using device: {device}")
     
@@ -255,7 +263,8 @@ def train_scratch(
             "loss": "bce_hard_labels_only",
             "lr": float(lr),
             "epochs_run": int(len(history["train_loss"])),
-            "batch_size": int(batch_size)
+            "batch_size": int(batch_size),
+            "seed": int(seed)
         }
     }
     
@@ -266,4 +275,11 @@ def train_scratch(
     return final_metrics
 
 if __name__ == "__main__":
-    train_scratch()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output_dir", type=str, default="model_checkpoints/student_scratch")
+    parser.add_argument("--metrics_file", type=str, default="eval/student_scratch_metrics.json")
+    parser.add_argument("--seed", type=int, default=42)
+    args = parser.parse_args()
+    
+    train_scratch(output_dir=args.output_dir, metrics_file=args.metrics_file, seed=args.seed)

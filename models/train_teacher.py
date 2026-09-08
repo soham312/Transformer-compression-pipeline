@@ -241,7 +241,8 @@ def train_teacher(
         "final_auc": history["val_auc"][-1],
         "final_accuracy": metrics["accuracy"],
         "model_size_mb": model_size_mb,
-        "avg_latency_ms_per_seq": avg_latency_ms
+        "avg_latency_ms_per_seq": avg_latency_ms,
+        "history": history
     }
     
     with open(metrics_file, "w") as f:

@@ -1,0 +1,626 @@
+Starting multi-seed training...
+
+==================================================
+Running seed 42
+==================================================
+Training distilled student for seed 42...
+Using device: cuda
+Loading tokenizer and datasets...
+README.md: 100% 9.40k/9.40k [00:00<00:00, 16.9MB/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+simplified/train-00000-of-00001.parquet: downloading bytes:   0% 0.00/2.77M [00:00<?, ?B/s]
+simplified/train-00000-of-00001.parquet: downloading bytes: 100% 2.73M/2.73M [00:01<00:00, 1.69MB/s,  262kB/s  ]
+simplified/train-00000-of-00001.parquet: reconstructing file: 100% 2.77M/2.77M [00:01<00:00, 1.72MB/s,  267kB/s  ]
+
+simplified/validation-00000-of-00001.par(…): downloading bytes:   0% 0.00/350k [00:00<?, ?B/s]
+simplified/validation-00000-of-00001.par(…): downloading bytes: 100% 346k/346k [00:01<00:00, 261kB/s, 33.6kB/s  ]
+simplified/validation-00000-of-00001.par(…): reconstructing file: 100% 350k/350k [00:01<00:00, 264kB/s, 34.0kB/s  ]
+
+simplified/test-00000-of-00001.parquet: downloading bytes:   0% 0.00/347k [00:00<?, ?B/s]
+simplified/test-00000-of-00001.parquet: downloading bytes: 100% 338k/338k [00:01<00:00, 247kB/s, 32.8kB/s  ]
+simplified/test-00000-of-00001.parquet: reconstructing file: 100% 347k/347k [00:01<00:00, 254kB/s, 33.7kB/s  ]
+Generating train split: 100% 43410/43410 [00:00<00:00, 678937.48 examples/s]
+Generating validation split: 100% 5426/5426 [00:00<00:00, 855607.11 examples/s]
+Generating test split: 100% 5427/5427 [00:00<00:00, 893803.27 examples/s]
+Map: 100% 43410/43410 [00:04<00:00, 9737.69 examples/s] 
+Map: 100% 5426/5426 [00:00<00:00, 10229.04 examples/s]
+Loading teacher model...
+Loading weights: 100% 201/201 [00:00<00:00, 4922.86it/s]
+Precomputing train and validation logits...
+Precomputing teacher logits...
+Precomputing teacher logits...
+Initializing student model...
+Starting distillation training...
+
+Epoch 1/15
+Train Loss: 0.6296 | Val Loss: 0.1898
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1889 | Val Loss: 0.1853
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1271 | Val Loss: 0.0892
+Val Macro F1: 0.1446 | Val Micro F1: 0.4416 | Val Hamming Acc: 0.9661
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0847 | Val Loss: 0.0777
+Val Macro F1: 0.2234 | Val Micro F1: 0.4698 | Val Hamming Acc: 0.9673
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0743 | Val Loss: 0.0748
+Val Macro F1: 0.2887 | Val Micro F1: 0.5138 | Val Hamming Acc: 0.9681
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0686 | Val Loss: 0.0742
+Val Macro F1: 0.3028 | Val Micro F1: 0.5150 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 7/15
+Train Loss: 0.0647 | Val Loss: 0.0730
+Val Macro F1: 0.3238 | Val Micro F1: 0.5314 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 8/15
+Train Loss: 0.0616 | Val Loss: 0.0729
+Val Macro F1: 0.3298 | Val Micro F1: 0.5289 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 9/15
+Train Loss: 0.0592 | Val Loss: 0.0731
+Val Macro F1: 0.3439 | Val Micro F1: 0.5337 | Val Hamming Acc: 0.9684
+
+Epoch 10/15
+Train Loss: 0.0573 | Val Loss: 0.0740
+Val Macro F1: 0.3341 | Val Micro F1: 0.5325 | Val Hamming Acc: 0.9681
+
+Epoch 11/15
+Train Loss: 0.0557 | Val Loss: 0.0739
+Val Macro F1: 0.3411 | Val Micro F1: 0.5380 | Val Hamming Acc: 0.9684
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.18 ms per sequence
+Distillation pipeline complete! Metrics saved to eval/student_distilled_metrics_seed42.json.
+Training scratch student for seed 42...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+config.json: 100% 570/570 [00:00<00:00, 1.96MB/s]
+tokenizer_config.json: 100% 48.0/48.0 [00:00<00:00, 230kB/s]
+vocab.txt: 100% 232k/232k [00:00<00:00, 2.58MB/s]
+tokenizer.json: 100% 466k/466k [00:00<00:00, 1.68MB/s]
+Map: 100% 43410/43410 [00:05<00:00, 7398.69 examples/s] 
+Map: 100% 5426/5426 [00:00<00:00, 10620.01 examples/s]
+Initializing student model (from scratch)...
+Starting training from scratch...
+
+Epoch 1/15
+Train Loss: 0.2840 | Val Loss: 0.1512
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1492 | Val Loss: 0.1352
+Val Macro F1: 0.0310 | Val Micro F1: 0.0849 | Val Hamming Acc: 0.9596
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1170 | Val Loss: 0.1042
+Val Macro F1: 0.2009 | Val Micro F1: 0.4652 | Val Hamming Acc: 0.9667
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0984 | Val Loss: 0.0970
+Val Macro F1: 0.2900 | Val Micro F1: 0.5070 | Val Hamming Acc: 0.9679
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0877 | Val Loss: 0.0953
+Val Macro F1: 0.3204 | Val Micro F1: 0.5103 | Val Hamming Acc: 0.9678
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0797 | Val Loss: 0.0958
+Val Macro F1: 0.3444 | Val Micro F1: 0.5174 | Val Hamming Acc: 0.9674
+
+Epoch 7/15
+Train Loss: 0.0729 | Val Loss: 0.0989
+Val Macro F1: 0.3703 | Val Micro F1: 0.5267 | Val Hamming Acc: 0.9668
+
+Epoch 8/15
+Train Loss: 0.0671 | Val Loss: 0.1028
+Val Macro F1: 0.3696 | Val Micro F1: 0.5264 | Val Hamming Acc: 0.9659
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.16 ms per sequence
+Scratch training pipeline complete! Metrics saved to eval/student_scratch_metrics_seed42.json.
+
+==================================================
+Running seed 123
+==================================================
+Training distilled student for seed 123...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading teacher model...
+Loading weights: 100% 201/201 [00:00<00:00, 4190.49it/s]
+Precomputing train and validation logits...
+Precomputing teacher logits...
+Precomputing teacher logits...
+Initializing student model...
+Starting distillation training...
+
+Epoch 1/15
+Train Loss: 0.6318 | Val Loss: 0.1888
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1887 | Val Loss: 0.1829
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1223 | Val Loss: 0.0892
+Val Macro F1: 0.1385 | Val Micro F1: 0.4122 | Val Hamming Acc: 0.9660
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0844 | Val Loss: 0.0773
+Val Macro F1: 0.2231 | Val Micro F1: 0.4904 | Val Hamming Acc: 0.9676
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0743 | Val Loss: 0.0745
+Val Macro F1: 0.2796 | Val Micro F1: 0.5027 | Val Hamming Acc: 0.9682
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0686 | Val Loss: 0.0735
+Val Macro F1: 0.3162 | Val Micro F1: 0.5225 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 7/15
+Train Loss: 0.0645 | Val Loss: 0.0735
+Val Macro F1: 0.3213 | Val Micro F1: 0.5266 | Val Hamming Acc: 0.9682
+Validation loss improved. Saving best student model...
+
+Epoch 8/15
+Train Loss: 0.0615 | Val Loss: 0.0728
+Val Macro F1: 0.3351 | Val Micro F1: 0.5278 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 9/15
+Train Loss: 0.0591 | Val Loss: 0.0734
+Val Macro F1: 0.3368 | Val Micro F1: 0.5300 | Val Hamming Acc: 0.9682
+
+Epoch 10/15
+Train Loss: 0.0571 | Val Loss: 0.0735
+Val Macro F1: 0.3381 | Val Micro F1: 0.5308 | Val Hamming Acc: 0.9683
+
+Epoch 11/15
+Train Loss: 0.0555 | Val Loss: 0.0738
+Val Macro F1: 0.3423 | Val Micro F1: 0.5298 | Val Hamming Acc: 0.9682
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.18 ms per sequence
+Distillation pipeline complete! Metrics saved to eval/student_distilled_metrics_seed123.json.
+Training scratch student for seed 123...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Initializing student model (from scratch)...
+Starting training from scratch...
+
+Epoch 1/15
+Train Loss: 0.2833 | Val Loss: 0.1514
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1497 | Val Loss: 0.1383
+Val Macro F1: 0.0291 | Val Micro F1: 0.0759 | Val Hamming Acc: 0.9596
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1173 | Val Loss: 0.1044
+Val Macro F1: 0.1743 | Val Micro F1: 0.4674 | Val Hamming Acc: 0.9663
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0982 | Val Loss: 0.0969
+Val Macro F1: 0.2618 | Val Micro F1: 0.5057 | Val Hamming Acc: 0.9676
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0874 | Val Loss: 0.0956
+Val Macro F1: 0.3215 | Val Micro F1: 0.5123 | Val Hamming Acc: 0.9678
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0792 | Val Loss: 0.0962
+Val Macro F1: 0.3441 | Val Micro F1: 0.5303 | Val Hamming Acc: 0.9676
+
+Epoch 7/15
+Train Loss: 0.0726 | Val Loss: 0.0994
+Val Macro F1: 0.3666 | Val Micro F1: 0.5235 | Val Hamming Acc: 0.9668
+
+Epoch 8/15
+Train Loss: 0.0671 | Val Loss: 0.1028
+Val Macro F1: 0.3788 | Val Micro F1: 0.5208 | Val Hamming Acc: 0.9660
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.16 ms per sequence
+Scratch training pipeline complete! Metrics saved to eval/student_scratch_metrics_seed123.json.
+
+==================================================
+Running seed 456
+==================================================
+Training distilled student for seed 456...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading teacher model...
+Loading weights: 100% 201/201 [00:00<00:00, 6190.10it/s]
+Precomputing train and validation logits...
+Precomputing teacher logits...
+Precomputing teacher logits...
+Initializing student model...
+Starting distillation training...
+
+Epoch 1/15
+Train Loss: 0.6310 | Val Loss: 0.1894
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1878 | Val Loss: 0.1631
+Val Macro F1: 0.0000 | Val Micro F1: 0.0003 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1158 | Val Loss: 0.0869
+Val Macro F1: 0.1445 | Val Micro F1: 0.4167 | Val Hamming Acc: 0.9662
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0825 | Val Loss: 0.0765
+Val Macro F1: 0.2336 | Val Micro F1: 0.4924 | Val Hamming Acc: 0.9676
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0731 | Val Loss: 0.0744
+Val Macro F1: 0.2865 | Val Micro F1: 0.5060 | Val Hamming Acc: 0.9682
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0679 | Val Loss: 0.0736
+Val Macro F1: 0.3043 | Val Micro F1: 0.5102 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 7/15
+Train Loss: 0.0640 | Val Loss: 0.0730
+Val Macro F1: 0.3279 | Val Micro F1: 0.5259 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 8/15
+Train Loss: 0.0610 | Val Loss: 0.0737
+Val Macro F1: 0.3334 | Val Micro F1: 0.5349 | Val Hamming Acc: 0.9686
+
+Epoch 9/15
+Train Loss: 0.0586 | Val Loss: 0.0741
+Val Macro F1: 0.3420 | Val Micro F1: 0.5285 | Val Hamming Acc: 0.9681
+
+Epoch 10/15
+Train Loss: 0.0566 | Val Loss: 0.0740
+Val Macro F1: 0.3490 | Val Micro F1: 0.5340 | Val Hamming Acc: 0.9682
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.18 ms per sequence
+Distillation pipeline complete! Metrics saved to eval/student_distilled_metrics_seed456.json.
+Training scratch student for seed 456...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Initializing student model (from scratch)...
+Starting training from scratch...
+
+Epoch 1/15
+Train Loss: 0.2820 | Val Loss: 0.1513
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1498 | Val Loss: 0.1406
+Val Macro F1: 0.0135 | Val Micro F1: 0.0401 | Val Hamming Acc: 0.9587
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1175 | Val Loss: 0.1049
+Val Macro F1: 0.1821 | Val Micro F1: 0.4719 | Val Hamming Acc: 0.9658
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0977 | Val Loss: 0.0966
+Val Macro F1: 0.2931 | Val Micro F1: 0.5085 | Val Hamming Acc: 0.9679
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0868 | Val Loss: 0.0960
+Val Macro F1: 0.3338 | Val Micro F1: 0.5113 | Val Hamming Acc: 0.9673
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0786 | Val Loss: 0.0971
+Val Macro F1: 0.3544 | Val Micro F1: 0.5210 | Val Hamming Acc: 0.9672
+
+Epoch 7/15
+Train Loss: 0.0719 | Val Loss: 0.1002
+Val Macro F1: 0.3703 | Val Micro F1: 0.5216 | Val Hamming Acc: 0.9663
+
+Epoch 8/15
+Train Loss: 0.0662 | Val Loss: 0.1038
+Val Macro F1: 0.3772 | Val Micro F1: 0.5230 | Val Hamming Acc: 0.9654
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.16 ms per sequence
+Scratch training pipeline complete! Metrics saved to eval/student_scratch_metrics_seed456.json.
+
+==================================================
+Running seed 789
+==================================================
+Training distilled student for seed 789...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading teacher model...
+Loading weights: 100% 201/201 [00:00<00:00, 3890.59it/s]
+Precomputing train and validation logits...
+Precomputing teacher logits...
+Precomputing teacher logits...
+Initializing student model...
+Starting distillation training...
+
+Epoch 1/15
+Train Loss: 0.6301 | Val Loss: 0.1892
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1885 | Val Loss: 0.1731
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1195 | Val Loss: 0.0879
+Val Macro F1: 0.1504 | Val Micro F1: 0.4453 | Val Hamming Acc: 0.9660
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0836 | Val Loss: 0.0769
+Val Macro F1: 0.1984 | Val Micro F1: 0.4620 | Val Hamming Acc: 0.9675
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0735 | Val Loss: 0.0751
+Val Macro F1: 0.2917 | Val Micro F1: 0.5093 | Val Hamming Acc: 0.9682
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0682 | Val Loss: 0.0732
+Val Macro F1: 0.3155 | Val Micro F1: 0.5203 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 7/15
+Train Loss: 0.0645 | Val Loss: 0.0736
+Val Macro F1: 0.3184 | Val Micro F1: 0.5228 | Val Hamming Acc: 0.9684
+
+Epoch 8/15
+Train Loss: 0.0613 | Val Loss: 0.0731
+Val Macro F1: 0.3275 | Val Micro F1: 0.5216 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 9/15
+Train Loss: 0.0589 | Val Loss: 0.0736
+Val Macro F1: 0.3315 | Val Micro F1: 0.5240 | Val Hamming Acc: 0.9684
+
+Epoch 10/15
+Train Loss: 0.0569 | Val Loss: 0.0740
+Val Macro F1: 0.3462 | Val Micro F1: 0.5348 | Val Hamming Acc: 0.9685
+
+Epoch 11/15
+Train Loss: 0.0555 | Val Loss: 0.0747
+Val Macro F1: 0.3421 | Val Micro F1: 0.5319 | Val Hamming Acc: 0.9682
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.18 ms per sequence
+Distillation pipeline complete! Metrics saved to eval/student_distilled_metrics_seed789.json.
+Training scratch student for seed 789...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Initializing student model (from scratch)...
+Starting training from scratch...
+
+Epoch 1/15
+Train Loss: 0.2829 | Val Loss: 0.1516
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1481 | Val Loss: 0.1298
+Val Macro F1: 0.0587 | Val Micro F1: 0.1633 | Val Hamming Acc: 0.9611
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1149 | Val Loss: 0.1036
+Val Macro F1: 0.1900 | Val Micro F1: 0.4735 | Val Hamming Acc: 0.9661
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0973 | Val Loss: 0.0966
+Val Macro F1: 0.2897 | Val Micro F1: 0.5062 | Val Hamming Acc: 0.9678
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0868 | Val Loss: 0.0955
+Val Macro F1: 0.3262 | Val Micro F1: 0.5055 | Val Hamming Acc: 0.9675
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0788 | Val Loss: 0.0969
+Val Macro F1: 0.3336 | Val Micro F1: 0.5208 | Val Hamming Acc: 0.9673
+
+Epoch 7/15
+Train Loss: 0.0721 | Val Loss: 0.0995
+Val Macro F1: 0.3635 | Val Micro F1: 0.5204 | Val Hamming Acc: 0.9666
+
+Epoch 8/15
+Train Loss: 0.0666 | Val Loss: 0.1026
+Val Macro F1: 0.3729 | Val Micro F1: 0.5235 | Val Hamming Acc: 0.9659
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.16 ms per sequence
+Scratch training pipeline complete! Metrics saved to eval/student_scratch_metrics_seed789.json.
+
+==================================================
+Running seed 1011
+==================================================
+Training distilled student for seed 1011...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading teacher model...
+Loading weights: 100% 201/201 [00:00<00:00, 4377.16it/s]
+Precomputing train and validation logits...
+Precomputing teacher logits...
+Precomputing teacher logits...
+Initializing student model...
+Starting distillation training...
+
+Epoch 1/15
+Train Loss: 0.6326 | Val Loss: 0.1892
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1881 | Val Loss: 0.1662
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1176 | Val Loss: 0.0881
+Val Macro F1: 0.1556 | Val Micro F1: 0.4414 | Val Hamming Acc: 0.9663
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0840 | Val Loss: 0.0775
+Val Macro F1: 0.2157 | Val Micro F1: 0.4938 | Val Hamming Acc: 0.9676
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0741 | Val Loss: 0.0741
+Val Macro F1: 0.2949 | Val Micro F1: 0.5159 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0686 | Val Loss: 0.0734
+Val Macro F1: 0.3144 | Val Micro F1: 0.5249 | Val Hamming Acc: 0.9683
+Validation loss improved. Saving best student model...
+
+Epoch 7/15
+Train Loss: 0.0646 | Val Loss: 0.0732
+Val Macro F1: 0.3183 | Val Micro F1: 0.5215 | Val Hamming Acc: 0.9684
+Validation loss improved. Saving best student model...
+
+Epoch 8/15
+Train Loss: 0.0617 | Val Loss: 0.0736
+Val Macro F1: 0.3352 | Val Micro F1: 0.5295 | Val Hamming Acc: 0.9685
+
+Epoch 9/15
+Train Loss: 0.0592 | Val Loss: 0.0736
+Val Macro F1: 0.3409 | Val Micro F1: 0.5304 | Val Hamming Acc: 0.9683
+
+Epoch 10/15
+Train Loss: 0.0573 | Val Loss: 0.0738
+Val Macro F1: 0.3477 | Val Micro F1: 0.5359 | Val Hamming Acc: 0.9684
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.18 ms per sequence
+Distillation pipeline complete! Metrics saved to eval/student_distilled_metrics_seed1011.json.
+Training scratch student for seed 1011...
+Using device: cuda
+Loading tokenizer and datasets...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Initializing student model (from scratch)...
+Starting training from scratch...
+
+Epoch 1/15
+Train Loss: 0.2892 | Val Loss: 0.1515
+Val Macro F1: 0.0000 | Val Micro F1: 0.0000 | Val Hamming Acc: 0.9580
+Validation loss improved. Saving best student model...
+
+Epoch 2/15
+Train Loss: 0.1486 | Val Loss: 0.1338
+Val Macro F1: 0.0743 | Val Micro F1: 0.2777 | Val Hamming Acc: 0.9616
+Validation loss improved. Saving best student model...
+
+Epoch 3/15
+Train Loss: 0.1165 | Val Loss: 0.1042
+Val Macro F1: 0.2147 | Val Micro F1: 0.4588 | Val Hamming Acc: 0.9666
+Validation loss improved. Saving best student model...
+
+Epoch 4/15
+Train Loss: 0.0982 | Val Loss: 0.0973
+Val Macro F1: 0.2867 | Val Micro F1: 0.5146 | Val Hamming Acc: 0.9675
+Validation loss improved. Saving best student model...
+
+Epoch 5/15
+Train Loss: 0.0875 | Val Loss: 0.0955
+Val Macro F1: 0.3235 | Val Micro F1: 0.5112 | Val Hamming Acc: 0.9677
+Validation loss improved. Saving best student model...
+
+Epoch 6/15
+Train Loss: 0.0795 | Val Loss: 0.0963
+Val Macro F1: 0.3428 | Val Micro F1: 0.5302 | Val Hamming Acc: 0.9673
+
+Epoch 7/15
+Train Loss: 0.0729 | Val Loss: 0.0995
+Val Macro F1: 0.3699 | Val Micro F1: 0.5319 | Val Hamming Acc: 0.9668
+
+Epoch 8/15
+Train Loss: 0.0672 | Val Loss: 0.1020
+Val Macro F1: 0.3676 | Val Micro F1: 0.5307 | Val Hamming Acc: 0.9664
+Early stopping triggered after 3 epochs.
+
+Final Student Model Size: 43.07 MB
+Measuring inference latency on validation set (Student)...
+Average Inference Latency (Student): 0.16 ms per sequence
+Scratch training pipeline complete! Metrics saved to eval/student_scratch_metrics_seed1011.json.
+
+Multi-seed training complete!

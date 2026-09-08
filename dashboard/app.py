@@ -144,11 +144,86 @@ st.markdown("---")
 # 2. Training Curves
 # ---------------------------------------------------------
 st.header("2. Training Curves")
-st.warning("Per-epoch training histories (loss and F1 curves) were not saved to disk in the metric JSON artifacts during the training stages. Therefore, training curves cannot be rendered.")
-st.markdown("""
-**Note on Stage 11 Findings (Loss/F1 Divergence):**
-Even though we cannot visualize the curves, the multi-seed training consistently demonstrated that the scratch student's validation loss bottoms out around **epoch 5**, while its macro F1 continues to climb until **epochs 7-8**. Selecting checkpoints based solely on validation loss systematically costs the scratch model roughly 0.04 macro F1 relative to its peak. Distillation acts as a regularizer, preventing this early loss divergence.
-""")
+
+histories_data = load_json("eval/training_histories.json")
+
+if histories_data:
+    col1, col2 = st.columns(2)
+    
+    def plot_model_history(ax1, ax2, model_type, data):
+        # We'll plot individual seed lines with low opacity, and the mean overlaid
+        seeds = list(data.keys())
+        if not seeds:
+            return
+            
+        # Determine max length
+        max_epochs = max([len(data[s]["train_loss"]) for s in seeds])
+        epochs = np.arange(1, max_epochs + 1)
+        
+        # Prepare arrays for means
+        # Pad with NaNs if lengths differ
+        def pad_array(arr, length):
+            if len(arr) == length:
+                return np.array(arr)
+            return np.pad(arr, (0, length - len(arr)), constant_values=np.nan)
+            
+        all_val_loss = np.array([pad_array(data[s]["val_loss"], max_epochs) for s in seeds])
+        all_val_f1 = np.array([pad_array(data[s]["val_macro_f1"], max_epochs) for s in seeds])
+        all_train_loss = np.array([pad_array(data[s]["train_loss"], max_epochs) for s in seeds])
+        selected_epochs = [data[s]["selected_epoch"] for s in seeds if data[s].get("selected_epoch") is not None]
+        
+        # Plot individual lines
+        for s in seeds:
+            e_len = len(data[s]["val_loss"])
+            ax1.plot(np.arange(1, e_len + 1), data[s]["val_loss"], color='blue', alpha=0.15)
+            ax1.plot(np.arange(1, e_len + 1), data[s]["train_loss"], color='gray', alpha=0.15)
+            ax2.plot(np.arange(1, e_len + 1), data[s]["val_macro_f1"], color='red', alpha=0.15)
+            
+        # Plot means
+        mean_val_loss = np.nanmean(all_val_loss, axis=0)
+        mean_train_loss = np.nanmean(all_train_loss, axis=0)
+        mean_val_f1 = np.nanmean(all_val_f1, axis=0)
+        
+        ax1.plot(epochs, mean_val_loss, color='blue', linewidth=2.5, label='Val Loss (Mean)')
+        ax1.plot(epochs, mean_train_loss, color='gray', linewidth=2.5, label='Train Loss (Mean)')
+        ax2.plot(epochs, mean_val_f1, color='red', linewidth=2.5, label='Val Macro F1 (Mean)')
+        
+        # Mark selected checkpoints
+        for se in selected_epochs:
+            ax1.axvline(x=se, color='blue', linestyle='--', alpha=0.3)
+            
+        if selected_epochs:
+            mean_se = np.mean(selected_epochs)
+            ax1.axvline(x=mean_se, color='blue', linestyle='-', linewidth=2, alpha=0.8, label=f'Avg Checkpoint (Epoch {mean_se:.1f})')
+            
+        ax1.set_xlabel("Epoch")
+        ax1.set_ylabel("BCE Loss")
+        ax2.set_ylabel("Macro F1")
+        
+        ax1.set_title(f"{model_type.capitalize()} Student")
+        
+        # Legends
+        lines_1, labels_1 = ax1.get_legend_handles_labels()
+        lines_2, labels_2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='center right')
+        
+    with col1:
+        fig_dist, ax1_dist = plt.subplots(figsize=(8, 5))
+        ax2_dist = ax1_dist.twinx()
+        if "distilled" in histories_data:
+            plot_model_history(ax1_dist, ax2_dist, "distilled", histories_data["distilled"])
+        st.pyplot(fig_dist)
+
+    with col2:
+        fig_scratch, ax1_scratch = plt.subplots(figsize=(8, 5))
+        ax2_scratch = ax1_scratch.twinx()
+        if "scratch" in histories_data:
+            plot_model_history(ax1_scratch, ax2_scratch, "scratch", histories_data["scratch"])
+        st.pyplot(fig_scratch)
+
+    st.caption("**Key Finding (Loss/F1 Divergence):** Notice that the scratch student's validation loss bottoms out at epoch 5 in every seed while its macro F1 keeps climbing to epochs 7–8. Selecting checkpoints strictly on validation loss systematically costs the scratch model relative to its peak F1. Distillation acts as a regularizer—its validation loss safely keeps improving alongside F1 to epochs 7–8.")
+else:
+    st.warning("Per-epoch training histories (loss and F1 curves) not found at eval/training_histories.json. Run parse_training_logs.py first.")
 
 st.markdown("---")
 

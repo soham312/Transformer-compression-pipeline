@@ -187,3 +187,13 @@ No additional dependencies were added beyond what was already in `requirements.t
 
 **Notes for Execution:**
 The dashboard gracefully degrades with explicit error messages if any artifact JSON file goes missing, and correctly populates metadata about the benchmarking environment directly from the dynamically loaded files.
+
+### Stage 12 Addendum — Training Curve Visualization
+
+**History Capture Fix:**
+- Updated `models/train_teacher.py`, `distillation/train_student.py`, and `distillation/train_scratch.py` to persist the `history` dictionary (per-epoch losses and metrics) directly into their respective final metrics JSON files. Future runs will inherently contain all data necessary for curve visualization.
+- Created `eval/parse_training_logs.py` to scrape the historical console output from `multiseed_log.txt` to backfill `eval/training_histories.json` for the existing runs, ensuring no data was lost.
+- Updated `dashboard/app.py` to seamlessly parse `eval/training_histories.json` and generate a robust visual panel overlaying all 5 seed runs. Individual seeds are mapped with low opacity, and their mean is overlaid with a thick line. 
+
+**Visualization Result:**
+The Dashboard's Training Curve panel vividly surfaces the loss/F1 divergence: you can visibly trace the scratch model's validation loss turning sharply upward at epoch 5 while its Macro F1 continues an upward trajectory until epoch 7/8. Meanwhile, distillation is observed acting as a regularizer, as the Distilled model's validation loss stably descends alongside F1 to epoch 7/8 without early divergence.

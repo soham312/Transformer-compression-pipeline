@@ -313,7 +313,8 @@ def train_student(
             "epochs_run": int(len(history["train_loss"])),
             "batch_size": int(batch_size),
             "seed": int(seed)
-        }
+        },
+        "history": history
     }
     
     with open(metrics_file, "w") as f:

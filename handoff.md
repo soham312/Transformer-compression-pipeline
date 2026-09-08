@@ -197,3 +197,15 @@ The dashboard gracefully degrades with explicit error messages if any artifact J
 
 **Visualization Result:**
 The Dashboard's Training Curve panel vividly surfaces the loss/F1 divergence: you can visibly trace the scratch model's validation loss turning sharply upward at epoch 5 while its Macro F1 continues an upward trajectory until epoch 7/8. Meanwhile, distillation is observed acting as a regularizer, as the Distilled model's validation loss stably descends alongside F1 to epoch 7/8 without early divergence.
+
+### Stage 13 — Final test coverage + comprehensive README (COMPLETE)
+
+Files: `tests/*`, `README.md`
+
+**Status:** Code complete, tests cleanly passing, documentation entirely finished.
+
+**What was done:**
+1. **Test Coverage Audit:** Executed the entire suite. Verified that `tests/test_distillation.py` rigorously covered all custom Binary KL mathematics (including $T^2$ scaling and alpha boundaries). Verified that `tests/test_quantization.py` and `test_static_quantization.py` checked shapes, outputs, and correlations across PyTorch dynamic, PyTorch static, and ONNX INT8 pipelines. Verified `tests/test_benchmark.py` covered ratio math accurately. Evaluated significance logic across synthetic datasets in `test_significance.py`.
+2. **README Construction:** Designed a robust, highly-legible repository landing page detailing the dual hypotheses (Distillation transferability and Quantization efficiency). Logged the 3 principal findings (Macro F1 null vs Micro F1 win, ONNX domination over PyTorch dynamic due to `nn.Embedding`, and the loss-checkpointing regularization divergence). Honestly captured the architecture configurations, CPU-only benchmarking caveats, and detailed exactly what decisions should be altered in a real production iteration (like implementing `pos_weight` and threshold-tuning to save the rare classes).
+
+This project is now 100% complete and ready to present.

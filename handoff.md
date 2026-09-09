@@ -209,3 +209,14 @@ Files: `tests/*`, `README.md`
 2. **README Construction:** Designed a robust, highly-legible repository landing page detailing the dual hypotheses (Distillation transferability and Quantization efficiency). Logged the 3 principal findings (Macro F1 null vs Micro F1 win, ONNX domination over PyTorch dynamic due to `nn.Embedding`, and the loss-checkpointing regularization divergence). Honestly captured the architecture configurations, CPU-only benchmarking caveats, and detailed exactly what decisions should be altered in a real production iteration (like implementing `pos_weight` and threshold-tuning to save the rare classes).
 
 This project is now 100% complete and ready to present.
+
+### Stage 13 Addendum — README Corrections
+
+**Status:** README accurately updated to match benchmark artifacts exactly.
+
+**What was done:**
+- Corrected the Teacher's median latency in the benchmark table to 12.90 ms/seq (derived directly from `eval/benchmark_results.json`) and accurately recomputed all relative speedup factors across the board based on this figure.
+- Added an explicit note beneath the benchmark table that the teacher's latency showed very high variance (std 29.23 ms), meaning the derived speedups should be read as approximate.
+- Fixed the execution order in the README to reference the correct script locations (`data/eda.py` and `eval/evaluate_baseline.py`).
+- Clarified the "regularization" claim in Finding 3 (now explicitly stating we observed consistency with regularization but did not formally test the mechanism).
+- Corrected the Section 7 "Why a control group" paragraph to reflect the exact statistical reality: while the control group proved the macro F1 gains were null (indistinguishable from the architecture learning hard labels), it simultaneously proved the highly significant micro F1/Hamming boost.

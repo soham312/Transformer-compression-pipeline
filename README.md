@@ -10,14 +10,14 @@ This repository explores the limits of knowledge distillation and INT8 quantizat
 
 | Model Variant | Size (MB) | Macro F1 | Micro F1 | Hamming Acc | Median Latency (ms/seq) | Compression vs Teacher | Speedup vs Teacher |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Teacher (BERT-base)** | 418.43 | 0.4110 | 0.5815 | 0.9708 | 5.37 | 1.0x | 1.0x |
-| **Distilled Student** | 43.07 | 0.3277 | 0.5266 | 0.9685 | 0.77 | 9.7x | 7.0x |
-| **Scratch Control** | 43.07 | 0.3233 | 0.5234 | 0.9674 | 0.76 | 9.7x | 7.1x |
-| **PyTorch Dynamic INT8** | 37.29 | 0.3272 | 0.5266 | 0.9685 | 1.25 | 11.2x | 4.3x (Regression) |
-| **PyTorch Static INT8*** | 42.61 | 0.3283 | 0.5263 | 0.9684 | 0.77 | 9.8x | 7.0x |
-| **ONNX INT8** | **10.84** | **0.3289** | 0.5266 | 0.9685 | **0.55** | **38.6x** | **9.8x** |
+| **Teacher (BERT-base)** | 418.43 | 0.4110 | 0.5815 | 0.9708 | 12.90 | 1.0x | 1.00x |
+| **Distilled Student** | 43.07 | 0.3269 | 0.5221 | 0.9685 | 0.69 | 9.7x | 18.83x |
+| **Scratch Control** | 43.07 | 0.3291 | 0.5276 | 0.9680 | 0.64 | 9.7x | 20.32x |
+| **PyTorch Dynamic INT8** | 36.39 | 0.3272 | 0.5225 | 0.9685 | 1.34 | 11.5x | 9.59x |
+| **PyTorch Static INT8*** | 42.39 | 0.3244 | 0.5204 | 0.9685 | 0.65 | 9.9x | 19.74x |
+| **ONNX INT8** | **10.85** | **0.3281** | 0.5234 | 0.9686 | **1.08** | **38.6x** | **11.90x** |
 
-*(Benchmarked on M3 Pro CPU, batch size 32, max_length 64. *Note: PyTorch static quantization was only applied to the classifier layer because `nn.TransformerEncoderLayer` crashes during eager-mode calibration).*
+*(Benchmarked on M3 Pro CPU, batch size 32, max_length 64. Note: PyTorch static quantization was only applied to the classifier layer because `nn.TransformerEncoderLayer` crashes during eager-mode calibration. Teacher latency showed high variance across repetitions (median 12.90 ms, std 29.23 ms); speedup factors derived from it should be read as approximate.)*
 
 Check out the interactive dashboard for visual analysis of the multi-seed variance, trade-off scatter plot, and training curves: `streamlit run dashboard/app.py`.
 
@@ -56,15 +56,15 @@ Across 5 seeds, compared to the scratch control, the distilled student achieved:
 
 ### Finding 2: Framework choice completely dominated the quantization technique.
 Applying INT8 dynamic quantization to the same model yielded drastically different results depending on the framework:
-- **PyTorch Dynamic Quantization** gave a mere 13% size reduction (43 MB -> 37 MB) and a **57% latency regression** (0.77 -> 1.25 ms/seq). PyTorch's `quantize_dynamic` only targets `nn.Linear` layers, ignoring the massive 30,522 x 256 `nn.Embedding` table which accounts for ~70% of the model's parameters. Furthermore, the runtime overhead of calculating activation ranges per-forward-pass heavily outweighed the INT8 matmul speedups on these small layers.
-- **ONNX Runtime** quantized the embeddings as well, delivering a massive **38.6x compression** (418 MB -> 10.8 MB) relative to the teacher, and a 9.8x speedup. 
+- **PyTorch Dynamic Quantization** gave a mere ~15.5% size reduction (43.07 MB -> 36.39 MB) and nearly a **2x latency regression** relative to the unquantized student (0.69 -> 1.34 ms/seq). PyTorch's `quantize_dynamic` only targets `nn.Linear` layers, ignoring the massive 30,522 x 256 `nn.Embedding` table which accounts for ~70% of the model's parameters. Furthermore, the runtime overhead of calculating activation ranges per-forward-pass heavily outweighed the INT8 matmul speedups on these small layers.
+- **ONNX Runtime** quantized the embeddings as well, delivering a massive **38.6x compression** (418.43 MB -> 10.85 MB) relative to the teacher, and an 11.9x speedup. 
 
 A paired bootstrap over 1000 resamples on the test set showed the ONNX INT8 accuracy difference was +0.0012, with a 95% CI of [0.0003, 0.0023]. This means there is **no measurable degradation** in accuracy from quantization.
 
 ### Finding 3: Validation loss and macro F1 disagree about when to stop.
 Replicated across all 10 multi-seed runs, a clear divergence emerged: the scratch student's validation loss bottoms out at **epoch 5** and then begins to rise (overfitting), while its validation macro F1 continues climbing until **epochs 7–8**. 
 Conversely, the distilled student's validation loss safely keeps improving alongside its F1 until epochs 7–8. 
-This suggests distillation acts as a powerful regularizer. The consequence for the scratch model is severe: selecting checkpoints strictly based on validation loss systematically costs the scratch model roughly 0.04 macro F1 relative to its true peak.
+This observation is consistent with a regularization effect, as we observed extended validation-loss improvement but did not test the mechanism directly. The consequence for the scratch model is severe: selecting checkpoints strictly based on validation loss systematically costs the scratch model roughly 0.04 macro F1 relative to its true peak.
 
 ## 6. Reproducing this project
 
@@ -76,9 +76,9 @@ pip install -r requirements.txt
 ```
 
 ### Execution Order
-1. **EDA:** `python eval/benchmark_all.py` (Note: Stage 2 scripts are in the repo)
+1. **EDA:** `python data/eda.py` (Note: Stage 2 scripts are in the repo)
 2. **Teacher Training (GPU recommended):** `python models/train_teacher.py`
-3. **Teacher Baseline & Calibration:** `python models/evaluate_teacher.py`
+3. **Teacher Baseline & Calibration:** `python eval/evaluate_baseline.py`
 4. **Student Training (GPU recommended):** `python distillation/train_student.py`
 5. **Control Training (GPU recommended):** `python distillation/train_scratch.py`
 6. **Quantization (CPU only):** `python quantization/dynamic_quantize.py`, `python quantization/static_quantize.py`, `python quantization/onnx_export.py`
@@ -97,7 +97,7 @@ Using a from-scratch 12M parameter student, rather than a pretrained checkpoint 
 GoEmotions is a multi-label task. Applying softmax assumes classes are mutually exclusive, forcing probabilities to sum to 1. This would aggressively penalize valid secondary labels. Modeling the classes as independent Bernoulli distributions via independent sigmoids and binary KL is mathematically correct for multi-label.
 
 **Why a control group?**
-Without the scratch student, we would observe a 0.3277 macro F1 and assume distillation "worked". The control group (0.3233 macro F1) proved that the vast majority of that performance was simply the architecture learning from the hard labels, and the distillation effect on macro F1 was statistically indistinguishable from noise.
+Without the scratch student, we would observe the distilled model's metrics and assume distillation drove all of its performance. The control group proved that for macro F1, the vast majority of that performance was simply the architecture learning from the hard labels—making the distillation effect on macro F1 statistically indistinguishable from noise. However, the control group also proved that distillation *did* provide a highly significant boost to micro F1 (p=0.0001) and Hamming accuracy, confirming that knowledge transfer occurred, but only for frequent classes.
 
 **Metrics**
 Exact-match accuracy requires all 28 classes to be predicted perfectly, making it nearly useless for granular evaluation on this dataset. Hamming accuracy and Micro F1 correctly evaluate per-label decisions, while Macro F1 treats all classes equally to expose the rare-class collapse.
